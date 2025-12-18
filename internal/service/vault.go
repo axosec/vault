@@ -1,10 +1,7 @@
 package service
 
 import (
-	"context"
-
 	"github.com/axosec/vault/internal/data/db"
-	"github.com/google/uuid"
 )
 
 type VaultService struct {
