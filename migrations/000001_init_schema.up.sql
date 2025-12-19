@@ -44,7 +44,7 @@ CREATE TABLE keys (
 
     enc_key BYTEA NOT NULL,
     nonce BYTEA NOT NULL,
-    access_level VARCHAR(20) DEFAULT 'READ',
+    access_level VARCHAR(20) NOT NULL DEFAULT 'READ',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

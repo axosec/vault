@@ -53,7 +53,7 @@ type CreateFolderKeyParams struct {
 	FolderID    *uuid.UUID
 	EncKey      []byte
 	Nonce       []byte
-	AccessLevel *string
+	AccessLevel string
 }
 
 func (q *Queries) CreateFolderKey(ctx context.Context, arg CreateFolderKeyParams) error {
@@ -112,7 +112,7 @@ type CreateItemKeyParams struct {
 	ItemID      *uuid.UUID
 	EncKey      []byte
 	Nonce       []byte
-	AccessLevel *string
+	AccessLevel string
 }
 
 func (q *Queries) CreateItemKey(ctx context.Context, arg CreateItemKeyParams) error {
@@ -127,17 +127,17 @@ func (q *Queries) CreateItemKey(ctx context.Context, arg CreateItemKeyParams) er
 }
 
 const getFolderItems = `-- name: GetFolderItems :many
-SELECT 
-    i.id, 
-    i.type, 
-    i.nonce AS item_nonce, 
-    i.enc_overview, 
+SELECT
+    i.id,
+    i.type,
+    i.nonce AS item_nonce,
+    i.enc_overview,
     i.updated_at,
-    k.enc_key AS wrapped_key, 
+    k.enc_key AS wrapped_key,
     k.nonce AS key_nonce
 FROM items i
 JOIN keys k ON i.id = k.item_id
-WHERE i.folder_id = $1 
+WHERE i.folder_id = $1
   AND k.user_id = $2
   AND i.deleted_at IS NULL
 ORDER BY i.created_at DESC
@@ -187,21 +187,21 @@ func (q *Queries) GetFolderItems(ctx context.Context, arg GetFolderItemsParams) 
 }
 
 const getItemData = `-- name: GetItemData :one
-SELECT 
-    i.id, 
+SELECT
+    i.id,
     i.folder_id,
-    i.type, 
-    i.nonce AS item_nonce, 
-    i.enc_data, 
+    i.type,
+    i.nonce AS item_nonce,
+    i.enc_data,
     i.enc_overview,
-    i.created_at, 
+    i.created_at,
     i.updated_at,
-    k.enc_key AS wrapped_key, 
+    k.enc_key AS wrapped_key,
     k.nonce AS key_nonce,
     k.access_level
 FROM items i
 JOIN keys k ON i.id = k.item_id
-WHERE i.id = $1 
+WHERE i.id = $1
   AND k.user_id = $2
   AND i.deleted_at IS NULL
 `
@@ -222,7 +222,7 @@ type GetItemDataRow struct {
 	UpdatedAt   time.Time
 	WrappedKey  []byte
 	KeyNonce    []byte
-	AccessLevel *string
+	AccessLevel string
 }
 
 func (q *Queries) GetItemData(ctx context.Context, arg GetItemDataParams) (GetItemDataRow, error) {
@@ -245,18 +245,18 @@ func (q *Queries) GetItemData(ctx context.Context, arg GetItemDataParams) (GetIt
 }
 
 const getUserFolders = `-- name: GetUserFolders :many
-SELECT 
-    f.id, 
-    f.parent_id, 
-    f.nonce, 
-    f.enc_name, 
+SELECT
+    f.id,
+    f.parent_id,
+    f.nonce,
+    f.enc_name,
     f.updated_at,
-    k.enc_key AS wrapped_key, 
+    k.enc_key AS wrapped_key,
     k.nonce AS key_nonce,
     k.access_level
 FROM folders f
 JOIN keys k ON f.id = k.folder_id
-WHERE k.user_id = $1 
+WHERE k.user_id = $1
   AND f.deleted_at IS NULL
 ORDER BY f.created_at ASC
 `
@@ -269,7 +269,7 @@ type GetUserFoldersRow struct {
 	UpdatedAt   time.Time
 	WrappedKey  []byte
 	KeyNonce    []byte
-	AccessLevel *string
+	AccessLevel string
 }
 
 func (q *Queries) GetUserFolders(ctx context.Context, userID uuid.UUID) ([]GetUserFoldersRow, error) {
@@ -302,8 +302,8 @@ func (q *Queries) GetUserFolders(ctx context.Context, userID uuid.UUID) ([]GetUs
 }
 
 const revokeUserAccess = `-- name: RevokeUserAccess :exec
-DELETE FROM keys 
-WHERE user_id = $1 
+DELETE FROM keys
+WHERE user_id = $1
   AND (folder_id = $2 OR item_id = $2)
 `
 
@@ -318,8 +318,8 @@ func (q *Queries) RevokeUserAccess(ctx context.Context, arg RevokeUserAccessPara
 }
 
 const softDeleteFolder = `-- name: SoftDeleteFolder :exec
-UPDATE folders 
-SET deleted_at = NOW() 
+UPDATE folders
+SET deleted_at = NOW()
 WHERE id = $1 AND owner_id = $2
 `
 
@@ -334,8 +334,8 @@ func (q *Queries) SoftDeleteFolder(ctx context.Context, arg SoftDeleteFolderPara
 }
 
 const softDeleteItem = `-- name: SoftDeleteItem :exec
-UPDATE items 
-SET deleted_at = NOW() 
+UPDATE items
+SET deleted_at = NOW()
 WHERE id = $1 AND owner_id = $2
 `
 

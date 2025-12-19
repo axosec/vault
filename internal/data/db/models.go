@@ -41,6 +41,6 @@ type Key struct {
 	ItemID      *uuid.UUID
 	EncKey      []byte
 	Nonce       []byte
-	AccessLevel *string
+	AccessLevel string
 	CreatedAt   time.Time
 }

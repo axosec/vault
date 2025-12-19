@@ -5,12 +5,12 @@ import (
 	"log"
 	"time"
 
+	"github.com/axosec/core/crypto/token"
 	_ "github.com/axosec/vault/docs"
 	"github.com/axosec/vault/internal/api"
 	"github.com/axosec/vault/internal/config"
 	"github.com/axosec/vault/internal/data/db"
 	"github.com/axosec/vault/internal/service"
-	"github.com/axosec/core/crypto/token"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
@@ -64,7 +64,7 @@ Built:  %s
 	queries := db.New(connPool)
 
 	// Initialize services
-	vaultService := service.NewVaultService(queries)
+	vaultService := service.NewVaultService(connPool, queries)
 
 	// Start http router
 	apiHandler := api.NewHandler(jwtManager, vaultService)
