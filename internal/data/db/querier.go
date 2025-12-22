@@ -18,9 +18,12 @@ type Querier interface {
 	GetFolderItems(ctx context.Context, arg GetFolderItemsParams) ([]GetFolderItemsRow, error)
 	GetItemData(ctx context.Context, arg GetItemDataParams) (GetItemDataRow, error)
 	GetUserFolders(ctx context.Context, userID uuid.UUID) ([]GetUserFoldersRow, error)
+	IsFolderOwner(ctx context.Context, arg IsFolderOwnerParams) (int32, error)
+	IsItemOwner(ctx context.Context, arg IsItemOwnerParams) (int32, error)
 	RevokeUserAccess(ctx context.Context, arg RevokeUserAccessParams) error
-	SoftDeleteFolder(ctx context.Context, arg SoftDeleteFolderParams) error
-	SoftDeleteItem(ctx context.Context, arg SoftDeleteItemParams) error
+	SoftDeleteFolder(ctx context.Context, arg SoftDeleteFolderParams) (int64, error)
+	SoftDeleteItem(ctx context.Context, arg SoftDeleteItemParams) (int64, error)
+	UpdateItemBlob(ctx context.Context, arg UpdateItemBlobParams) error
 }
 
 var _ Querier = (*Queries)(nil)

@@ -25,7 +25,7 @@ type UpdateItemReq struct {
 }
 
 type ItemResponse struct {
-	ID        uuid.UUID `json:"id"`
+	ID uuid.UUID `json:"id"`
 }
 
 type ItemSummary struct {
@@ -38,12 +38,12 @@ type ItemSummary struct {
 }
 
 type ItemDetail struct {
-	ID         uuid.UUID `json:"id"`
-	FolderID   uuid.UUID `json:"folder_id"`
-	Type       string    `json:"type"`
-	EncData    []byte    `json:"enc_data"`
-	DataNonce  []byte    `json:"data_nonce"`
-	WrappedKey []byte    `json:"wrapped_key"`
-	KeyNonce   []byte    `json:"key_nonce"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID         uuid.UUID  `json:"id"`
+	FolderID   *uuid.UUID `json:"folder_id"`
+	Type       string     `json:"type"`
+	EncData    []byte     `json:"enc_data"`
+	DataNonce  []byte     `json:"data_nonce"`
+	WrappedKey []byte     `json:"wrapped_key"`
+	KeyNonce   []byte     `json:"key_nonce"`
+	UpdatedAt  time.Time  `json:"updated_at"`
 }

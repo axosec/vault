@@ -19,7 +19,7 @@ WHERE k.user_id = $1
   AND f.deleted_at IS NULL
 ORDER BY f.created_at ASC;
 
--- name: SoftDeleteFolder :exec
+-- name: SoftDeleteFolder :execrows
 UPDATE folders
 SET deleted_at = NOW()
 WHERE id = $1 AND owner_id = $2;
@@ -29,6 +29,15 @@ WHERE id = $1 AND owner_id = $2;
 INSERT INTO items (owner_id, folder_id, type, nonce, enc_data, enc_overview)
 VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, created_at, updated_at;
+
+-- name: UpdateItemBlob :exec
+UPDATE items
+SET
+    enc_data = $1,
+    enc_overview = $2,
+    nonce = $3,
+    updated_at = NOW()
+WHERE id = $4;
 
 -- name: GetFolderItems :many
 SELECT
@@ -65,7 +74,7 @@ WHERE i.id = $1
   AND k.user_id = $2
   AND i.deleted_at IS NULL;
 
--- name: SoftDeleteItem :exec
+-- name: SoftDeleteItem :execrows
 UPDATE items
 SET deleted_at = NOW()
 WHERE id = $1 AND owner_id = $2;
@@ -82,3 +91,11 @@ VALUES ($1, $2, $3, $4, $5);
 DELETE FROM keys
 WHERE user_id = $1
   AND (folder_id = $2 OR item_id = $2);
+
+-- name: IsFolderOwner :one
+SELECT 1 FROM folders
+WHERE id = $1 AND owner_id = $2;
+
+-- name: IsItemOwner :one
+SELECT 1 FROM items
+WHERE id = $1 AND owner_id = $2;

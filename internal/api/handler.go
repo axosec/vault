@@ -28,8 +28,22 @@ func (h *Handler) Helth(c *gin.Context) {
 
 func (h *Handler) RegisterRouters(e *gin.Engine) {
 	v1 := e.Group("/v1")
-	{
-		v1.GET("/health", h.Helth)
 
+	v1.GET("/health", h.Helth)
+
+	protected := v1.Group("/")
+	protected.Use(h.AuthenticatedMiddleware())
+	{
+		protected.POST("/folders", h.CreateFolderHandler)
+		protected.GET("/folders", h.ListFoldersHandler)
+
+		protected.POST("/items", h.CreateItemHandler)
+		protected.GET("/items", h.ListItemsHandler)
+		protected.GET("/items/:id", h.GetItemHandler)
+		protected.PUT("/items/:id", h.UpdateItemHandler)
+
+		protected.DELETE("/resources/:type/:id", h.DeleteResourceHandler)
+		protected.POST("/share", h.ShareResourceHandler)
+		protected.POST("/share/revoke", h.RevokeAccessHandler)
 	}
 }

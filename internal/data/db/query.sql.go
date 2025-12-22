@@ -301,6 +301,40 @@ func (q *Queries) GetUserFolders(ctx context.Context, userID uuid.UUID) ([]GetUs
 	return items, nil
 }
 
+const isFolderOwner = `-- name: IsFolderOwner :one
+SELECT 1 FROM folders
+WHERE id = $1 AND owner_id = $2
+`
+
+type IsFolderOwnerParams struct {
+	ID      uuid.UUID
+	OwnerID uuid.UUID
+}
+
+func (q *Queries) IsFolderOwner(ctx context.Context, arg IsFolderOwnerParams) (int32, error) {
+	row := q.db.QueryRow(ctx, isFolderOwner, arg.ID, arg.OwnerID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const isItemOwner = `-- name: IsItemOwner :one
+SELECT 1 FROM items
+WHERE id = $1 AND owner_id = $2
+`
+
+type IsItemOwnerParams struct {
+	ID      uuid.UUID
+	OwnerID uuid.UUID
+}
+
+func (q *Queries) IsItemOwner(ctx context.Context, arg IsItemOwnerParams) (int32, error) {
+	row := q.db.QueryRow(ctx, isItemOwner, arg.ID, arg.OwnerID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
 const revokeUserAccess = `-- name: RevokeUserAccess :exec
 DELETE FROM keys
 WHERE user_id = $1
@@ -317,7 +351,7 @@ func (q *Queries) RevokeUserAccess(ctx context.Context, arg RevokeUserAccessPara
 	return err
 }
 
-const softDeleteFolder = `-- name: SoftDeleteFolder :exec
+const softDeleteFolder = `-- name: SoftDeleteFolder :execrows
 UPDATE folders
 SET deleted_at = NOW()
 WHERE id = $1 AND owner_id = $2
@@ -328,12 +362,15 @@ type SoftDeleteFolderParams struct {
 	OwnerID uuid.UUID
 }
 
-func (q *Queries) SoftDeleteFolder(ctx context.Context, arg SoftDeleteFolderParams) error {
-	_, err := q.db.Exec(ctx, softDeleteFolder, arg.ID, arg.OwnerID)
-	return err
+func (q *Queries) SoftDeleteFolder(ctx context.Context, arg SoftDeleteFolderParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteFolder, arg.ID, arg.OwnerID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
 
-const softDeleteItem = `-- name: SoftDeleteItem :exec
+const softDeleteItem = `-- name: SoftDeleteItem :execrows
 UPDATE items
 SET deleted_at = NOW()
 WHERE id = $1 AND owner_id = $2
@@ -344,7 +381,37 @@ type SoftDeleteItemParams struct {
 	OwnerID uuid.UUID
 }
 
-func (q *Queries) SoftDeleteItem(ctx context.Context, arg SoftDeleteItemParams) error {
-	_, err := q.db.Exec(ctx, softDeleteItem, arg.ID, arg.OwnerID)
+func (q *Queries) SoftDeleteItem(ctx context.Context, arg SoftDeleteItemParams) (int64, error) {
+	result, err := q.db.Exec(ctx, softDeleteItem, arg.ID, arg.OwnerID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const updateItemBlob = `-- name: UpdateItemBlob :exec
+UPDATE items
+SET
+    enc_data = $1,
+    enc_overview = $2,
+    nonce = $3,
+    updated_at = NOW()
+WHERE id = $4
+`
+
+type UpdateItemBlobParams struct {
+	EncData     []byte
+	EncOverview []byte
+	Nonce       []byte
+	ID          uuid.UUID
+}
+
+func (q *Queries) UpdateItemBlob(ctx context.Context, arg UpdateItemBlobParams) error {
+	_, err := q.db.Exec(ctx, updateItemBlob,
+		arg.EncData,
+		arg.EncOverview,
+		arg.Nonce,
+		arg.ID,
+	)
 	return err
 }
