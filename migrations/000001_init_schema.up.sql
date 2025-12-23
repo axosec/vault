@@ -1,10 +1,9 @@
 CREATE TABLE folders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     owner_id UUID NOT NULL,
-    parent_id UUID REFERENCES folders(id),
 
     nonce BYTEA NOT NULL,
-    enc_name BYTEA NOT NULL,
+    enc_metadata BYTEA NOT NULL,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

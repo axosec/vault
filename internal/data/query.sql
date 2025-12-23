@@ -1,14 +1,13 @@
 -- name: CreateFolder :one
-INSERT INTO folders (owner_id, parent_id, nonce, enc_name)
-VALUES ($1, $2, $3, $4)
+INSERT INTO folders (owner_id, nonce, enc_metadata)
+VALUES ($1, $2, $3)
 RETURNING id, created_at, updated_at;
 
 -- name: GetUserFolders :many
 SELECT
     f.id,
-    f.parent_id,
     f.nonce,
-    f.enc_name,
+    f.enc_metadata,
     f.updated_at,
     k.enc_key AS wrapped_key,
     k.nonce AS key_nonce,

@@ -13,16 +13,15 @@ import (
 )
 
 const createFolder = `-- name: CreateFolder :one
-INSERT INTO folders (owner_id, parent_id, nonce, enc_name)
-VALUES ($1, $2, $3, $4)
+INSERT INTO folders (owner_id, nonce, enc_metadata)
+VALUES ($1, $2, $3)
 RETURNING id, created_at, updated_at
 `
 
 type CreateFolderParams struct {
-	OwnerID  uuid.UUID
-	ParentID *uuid.UUID
-	Nonce    []byte
-	EncName  []byte
+	OwnerID     uuid.UUID
+	Nonce       []byte
+	EncMetadata []byte
 }
 
 type CreateFolderRow struct {
@@ -32,12 +31,7 @@ type CreateFolderRow struct {
 }
 
 func (q *Queries) CreateFolder(ctx context.Context, arg CreateFolderParams) (CreateFolderRow, error) {
-	row := q.db.QueryRow(ctx, createFolder,
-		arg.OwnerID,
-		arg.ParentID,
-		arg.Nonce,
-		arg.EncName,
-	)
+	row := q.db.QueryRow(ctx, createFolder, arg.OwnerID, arg.Nonce, arg.EncMetadata)
 	var i CreateFolderRow
 	err := row.Scan(&i.ID, &i.CreatedAt, &i.UpdatedAt)
 	return i, err
@@ -247,9 +241,8 @@ func (q *Queries) GetItemData(ctx context.Context, arg GetItemDataParams) (GetIt
 const getUserFolders = `-- name: GetUserFolders :many
 SELECT
     f.id,
-    f.parent_id,
     f.nonce,
-    f.enc_name,
+    f.enc_metadata,
     f.updated_at,
     k.enc_key AS wrapped_key,
     k.nonce AS key_nonce,
@@ -263,9 +256,8 @@ ORDER BY f.created_at ASC
 
 type GetUserFoldersRow struct {
 	ID          uuid.UUID
-	ParentID    *uuid.UUID
 	Nonce       []byte
-	EncName     []byte
+	EncMetadata []byte
 	UpdatedAt   time.Time
 	WrappedKey  []byte
 	KeyNonce    []byte
@@ -283,9 +275,8 @@ func (q *Queries) GetUserFolders(ctx context.Context, userID uuid.UUID) ([]GetUs
 		var i GetUserFoldersRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.ParentID,
 			&i.Nonce,
-			&i.EncName,
+			&i.EncMetadata,
 			&i.UpdatedAt,
 			&i.WrappedKey,
 			&i.KeyNonce,

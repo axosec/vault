@@ -33,9 +33,8 @@ func (s *VaultService) CreateFolder(ctx context.Context, userID uuid.UUID, req d
 
 	folder, err := qtx.CreateFolder(ctx, db.CreateFolderParams{
 		OwnerID:  userID,
-		ParentID: req.ParentID,
 		Nonce:    req.NameNonce,
-		EncName:  req.EncName,
+		EncMetadata:  req.EncMetadata,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create folder: %w", err)
@@ -59,7 +58,6 @@ func (s *VaultService) CreateFolder(ctx context.Context, userID uuid.UUID, req d
 
 	return &dto.FolderResponse{
 		ID:       folder.ID,
-		ParentID: req.ParentID,
 	}, nil
 }
 
@@ -73,11 +71,10 @@ func (s *VaultService) ListFolders(ctx context.Context, userID uuid.UUID) ([]dto
 
 	for i, folder := range foldersDb {
 		folders[i].ID = folder.ID
-		folders[i].EncName = folder.EncName
-		folders[i].EncNameNonce = folder.Nonce
+		folders[i].EncMetadata = folder.EncMetadata
+		folders[i].Nonce = folder.Nonce
 		folders[i].KeyNonce = folder.KeyNonce
 		folders[i].WrappedKey = folder.WrappedKey
-		folders[i].ParentID = folder.ParentID
 	}
 
 	return folders, nil

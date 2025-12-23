@@ -11,14 +11,13 @@ import (
 )
 
 type Folder struct {
-	ID        uuid.UUID
-	OwnerID   uuid.UUID
-	ParentID  *uuid.UUID
-	Nonce     []byte
-	EncName   []byte
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt *time.Time
+	ID          uuid.UUID
+	OwnerID     uuid.UUID
+	Nonce       []byte
+	EncMetadata []byte
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
 }
 
 type Item struct {
