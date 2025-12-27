@@ -23,6 +23,7 @@ type Querier interface {
 	RevokeUserAccess(ctx context.Context, arg RevokeUserAccessParams) error
 	SoftDeleteFolder(ctx context.Context, arg SoftDeleteFolderParams) (int64, error)
 	SoftDeleteItem(ctx context.Context, arg SoftDeleteItemParams) (int64, error)
+	UpdateFolderMetadata(ctx context.Context, arg UpdateFolderMetadataParams) (int64, error)
 	UpdateItemBlob(ctx context.Context, arg UpdateItemBlobParams) error
 }
 

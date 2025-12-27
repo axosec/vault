@@ -36,6 +36,7 @@ func (h *Handler) RegisterRouters(e *gin.Engine) {
 	{
 		protected.POST("/folders", h.CreateFolderHandler)
 		protected.GET("/folders", h.ListFoldersHandler)
+		protected.PUT("/folders/:id", h.UpdateFolderHandler)
 
 		protected.POST("/items", h.CreateItemHandler)
 		protected.GET("/items", h.ListItemsHandler)

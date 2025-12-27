@@ -56,3 +56,38 @@ func (h *Handler) ListFoldersHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, folders)
 }
+
+// UpdateFolderHandler godoc
+// @Summary      Update Folder Metadata
+// @Description  Update the encrypted name/icon/color blob for a folder.
+// @Tags         Folders
+// @Accept       json
+// @Param        id   path      string true "Folder UUID"
+// @Param        request body dto.UpdateFolderReq true "New Encrypted Metadata"
+// @Success      200  {string}  string "OK"
+// @Failure      400  {object}  map[string]string "Invalid request"
+// @Failure      500  {object}  map[string]string "Internal server error"
+// @Router       /folders/{id} [put]
+func (h *Handler) UpdateFolderHandler(c *gin.Context) {
+	idStr := c.Param("id")
+	folderID, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid folder ID"})
+		return
+	}
+
+	var req dto.UpdateFolderReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		return
+	}
+
+	userID := c.MustGet("user_id").(uuid.UUID)
+
+	if err := h.vaultService.UpdateFolder(c.Request.Context(), userID, folderID, req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update folder"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}

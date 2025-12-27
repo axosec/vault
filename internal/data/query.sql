@@ -18,6 +18,14 @@ WHERE k.user_id = $1
   AND f.deleted_at IS NULL
 ORDER BY f.created_at ASC;
 
+-- name: UpdateFolderMetadata :execrows
+UPDATE folders
+SET
+    enc_metadata = $1,
+    nonce = $2,
+    updated_at = NOW()
+WHERE id = $3 AND owner_id = $4;
+
 -- name: SoftDeleteFolder :execrows
 UPDATE folders
 SET deleted_at = NOW()

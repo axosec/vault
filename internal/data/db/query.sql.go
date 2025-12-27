@@ -380,6 +380,35 @@ func (q *Queries) SoftDeleteItem(ctx context.Context, arg SoftDeleteItemParams) 
 	return result.RowsAffected(), nil
 }
 
+const updateFolderMetadata = `-- name: UpdateFolderMetadata :execrows
+UPDATE folders
+SET
+    enc_metadata = $1,
+    nonce = $2,
+    updated_at = NOW()
+WHERE id = $3 AND owner_id = $4
+`
+
+type UpdateFolderMetadataParams struct {
+	EncMetadata []byte
+	Nonce       []byte
+	ID          uuid.UUID
+	OwnerID     uuid.UUID
+}
+
+func (q *Queries) UpdateFolderMetadata(ctx context.Context, arg UpdateFolderMetadataParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateFolderMetadata,
+		arg.EncMetadata,
+		arg.Nonce,
+		arg.ID,
+		arg.OwnerID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const updateItemBlob = `-- name: UpdateItemBlob :exec
 UPDATE items
 SET

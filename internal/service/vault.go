@@ -32,9 +32,9 @@ func (s *VaultService) CreateFolder(ctx context.Context, userID uuid.UUID, req d
 	qtx := s.q.WithTx(tx)
 
 	folder, err := qtx.CreateFolder(ctx, db.CreateFolderParams{
-		OwnerID:  userID,
-		Nonce:    req.NameNonce,
-		EncMetadata:  req.EncMetadata,
+		OwnerID:     userID,
+		Nonce:       req.NameNonce,
+		EncMetadata: req.EncMetadata,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create folder: %w", err)
@@ -57,7 +57,7 @@ func (s *VaultService) CreateFolder(ctx context.Context, userID uuid.UUID, req d
 	}
 
 	return &dto.FolderResponse{
-		ID:       folder.ID,
+		ID: folder.ID,
 	}, nil
 }
 
@@ -78,6 +78,25 @@ func (s *VaultService) ListFolders(ctx context.Context, userID uuid.UUID) ([]dto
 	}
 
 	return folders, nil
+}
+
+func (s *VaultService) UpdateFolder(ctx context.Context, userID uuid.UUID, folderID uuid.UUID, req dto.UpdateFolderReq) error {
+	rowsAffected, err := s.q.UpdateFolderMetadata(ctx, db.UpdateFolderMetadataParams{
+		EncMetadata: req.EncMetadata,
+		Nonce:       req.MetadataNonce,
+		ID:          folderID,
+		OwnerID:     userID,
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to update folder: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("folder not found or access denied")
+	}
+
+	return nil
 }
 
 func (s *VaultService) CreateItem(ctx context.Context, userID uuid.UUID, req dto.CreateItemReq) (*dto.ItemResponse, error) {

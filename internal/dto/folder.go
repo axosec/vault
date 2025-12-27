@@ -16,6 +16,11 @@ type FolderResponse struct {
 	ID uuid.UUID `json:"id"`
 }
 
+type UpdateFolderReq struct {
+	EncMetadata   []byte `json:"enc_metadata" binding:"required"`
+	MetadataNonce []byte `json:"nonce" binding:"required"`
+}
+
 type FolderSummary struct {
 	ID          uuid.UUID `json:"id"`
 	EncMetadata []byte    `json:"enc_metadata"`
