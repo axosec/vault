@@ -21,16 +21,17 @@ type Folder struct {
 }
 
 type Item struct {
-	ID          uuid.UUID
-	OwnerID     uuid.UUID
-	FolderID    *uuid.UUID
-	Type        string
-	Nonce       []byte
-	EncData     []byte
-	EncOverview []byte
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   *time.Time
+	ID            uuid.UUID
+	OwnerID       uuid.UUID
+	FolderID      *uuid.UUID
+	Type          string
+	Nonce         []byte
+	EncData       []byte
+	OverviewNonce []byte
+	EncOverview   []byte
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     *time.Time
 }
 
 type Key struct {

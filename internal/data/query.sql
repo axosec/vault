@@ -33,8 +33,8 @@ WHERE id = $1 AND owner_id = $2;
 
 
 -- name: CreateItem :one
-INSERT INTO items (owner_id, folder_id, type, nonce, enc_data, enc_overview)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO items (owner_id, folder_id, type, nonce, enc_data, overview_nonce, enc_overview)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, created_at, updated_at;
 
 -- name: UpdateItemBlob :exec
@@ -43,14 +43,15 @@ SET
     enc_data = $1,
     enc_overview = $2,
     nonce = $3,
+    overview_nonce = $4,
     updated_at = NOW()
-WHERE id = $4;
+WHERE id = $5;
 
 -- name: GetFolderItems :many
 SELECT
     i.id,
     i.type,
-    i.nonce AS item_nonce,
+    i.overview_nonce,
     i.enc_overview,
     i.updated_at,
     k.enc_key AS wrapped_key,
@@ -70,6 +71,7 @@ SELECT
     i.nonce AS item_nonce,
     i.enc_data,
     i.enc_overview,
+    i.overview_nonce,
     i.created_at,
     i.updated_at,
     k.enc_key AS wrapped_key,

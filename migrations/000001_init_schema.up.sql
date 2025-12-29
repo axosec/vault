@@ -20,6 +20,7 @@ CREATE TABLE items (
     nonce BYTEA NOT NULL,
     enc_data BYTEA NOT NULL,
 
+    overview_nonce BYTEA,
     enc_overview BYTEA,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

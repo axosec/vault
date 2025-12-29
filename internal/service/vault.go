@@ -114,12 +114,13 @@ func (s *VaultService) CreateItem(ctx context.Context, userID uuid.UUID, req dto
 	}
 
 	item, err := qtx.CreateItem(ctx, db.CreateItemParams{
-		OwnerID:     userID,
-		FolderID:    folderIDPtr,
-		Type:        req.Type,
-		Nonce:       req.DataNonce,
-		EncData:     req.EncData,
-		EncOverview: req.EncOverview,
+		OwnerID:       userID,
+		FolderID:      folderIDPtr,
+		Type:          req.Type,
+		Nonce:         req.DataNonce,
+		EncData:       req.EncData,
+		EncOverview:   req.EncOverview,
+		OverviewNonce: req.OverviewNonce,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create item: %w", err)
@@ -163,12 +164,13 @@ func (s *VaultService) ListItems(ctx context.Context, userID uuid.UUID, folderID
 	items := make([]dto.ItemSummary, len(itemsDb))
 	for i, item := range itemsDb {
 		items[i] = dto.ItemSummary{
-			ID:          item.ID,
-			Type:        item.Type,
-			EncOverview: item.EncOverview,
-			WrappedKey:  item.WrappedKey,
-			KeyNonce:    item.KeyNonce,
-			UpdatedAt:   item.UpdatedAt,
+			ID:            item.ID,
+			Type:          item.Type,
+			EncOverview:   item.EncOverview,
+			OverviewNonce: item.OverviewNonce,
+			WrappedKey:    item.WrappedKey,
+			KeyNonce:      item.KeyNonce,
+			UpdatedAt:     item.UpdatedAt,
 		}
 	}
 
@@ -223,10 +225,11 @@ func (s *VaultService) UpdateItem(ctx context.Context, userID uuid.UUID, itemID 
 	}
 
 	err = qtx.UpdateItemBlob(ctx, db.UpdateItemBlobParams{
-		EncData:     req.EncData,
-		EncOverview: req.EncOverview,
-		Nonce:       req.Nonce,
-		ID:          itemID,
+		EncData:       req.EncData,
+		EncOverview:   req.EncOverview,
+		Nonce:         req.Nonce,
+		OverviewNonce: req.OverviewNonce,
+		ID:            itemID,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update item blob: %w", err)

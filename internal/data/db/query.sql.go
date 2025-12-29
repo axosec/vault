@@ -62,18 +62,19 @@ func (q *Queries) CreateFolderKey(ctx context.Context, arg CreateFolderKeyParams
 }
 
 const createItem = `-- name: CreateItem :one
-INSERT INTO items (owner_id, folder_id, type, nonce, enc_data, enc_overview)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO items (owner_id, folder_id, type, nonce, enc_data, overview_nonce, enc_overview)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, created_at, updated_at
 `
 
 type CreateItemParams struct {
-	OwnerID     uuid.UUID
-	FolderID    *uuid.UUID
-	Type        string
-	Nonce       []byte
-	EncData     []byte
-	EncOverview []byte
+	OwnerID       uuid.UUID
+	FolderID      *uuid.UUID
+	Type          string
+	Nonce         []byte
+	EncData       []byte
+	OverviewNonce []byte
+	EncOverview   []byte
 }
 
 type CreateItemRow struct {
@@ -89,6 +90,7 @@ func (q *Queries) CreateItem(ctx context.Context, arg CreateItemParams) (CreateI
 		arg.Type,
 		arg.Nonce,
 		arg.EncData,
+		arg.OverviewNonce,
 		arg.EncOverview,
 	)
 	var i CreateItemRow
@@ -124,7 +126,7 @@ const getFolderItems = `-- name: GetFolderItems :many
 SELECT
     i.id,
     i.type,
-    i.nonce AS item_nonce,
+    i.overview_nonce,
     i.enc_overview,
     i.updated_at,
     k.enc_key AS wrapped_key,
@@ -143,13 +145,13 @@ type GetFolderItemsParams struct {
 }
 
 type GetFolderItemsRow struct {
-	ID          uuid.UUID
-	Type        string
-	ItemNonce   []byte
-	EncOverview []byte
-	UpdatedAt   time.Time
-	WrappedKey  []byte
-	KeyNonce    []byte
+	ID            uuid.UUID
+	Type          string
+	OverviewNonce []byte
+	EncOverview   []byte
+	UpdatedAt     time.Time
+	WrappedKey    []byte
+	KeyNonce      []byte
 }
 
 func (q *Queries) GetFolderItems(ctx context.Context, arg GetFolderItemsParams) ([]GetFolderItemsRow, error) {
@@ -164,7 +166,7 @@ func (q *Queries) GetFolderItems(ctx context.Context, arg GetFolderItemsParams) 
 		if err := rows.Scan(
 			&i.ID,
 			&i.Type,
-			&i.ItemNonce,
+			&i.OverviewNonce,
 			&i.EncOverview,
 			&i.UpdatedAt,
 			&i.WrappedKey,
@@ -188,6 +190,7 @@ SELECT
     i.nonce AS item_nonce,
     i.enc_data,
     i.enc_overview,
+    i.overview_nonce,
     i.created_at,
     i.updated_at,
     k.enc_key AS wrapped_key,
@@ -206,17 +209,18 @@ type GetItemDataParams struct {
 }
 
 type GetItemDataRow struct {
-	ID          uuid.UUID
-	FolderID    *uuid.UUID
-	Type        string
-	ItemNonce   []byte
-	EncData     []byte
-	EncOverview []byte
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	WrappedKey  []byte
-	KeyNonce    []byte
-	AccessLevel string
+	ID            uuid.UUID
+	FolderID      *uuid.UUID
+	Type          string
+	ItemNonce     []byte
+	EncData       []byte
+	EncOverview   []byte
+	OverviewNonce []byte
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	WrappedKey    []byte
+	KeyNonce      []byte
+	AccessLevel   string
 }
 
 func (q *Queries) GetItemData(ctx context.Context, arg GetItemDataParams) (GetItemDataRow, error) {
@@ -229,6 +233,7 @@ func (q *Queries) GetItemData(ctx context.Context, arg GetItemDataParams) (GetIt
 		&i.ItemNonce,
 		&i.EncData,
 		&i.EncOverview,
+		&i.OverviewNonce,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.WrappedKey,
@@ -415,15 +420,17 @@ SET
     enc_data = $1,
     enc_overview = $2,
     nonce = $3,
+    overview_nonce = $4,
     updated_at = NOW()
-WHERE id = $4
+WHERE id = $5
 `
 
 type UpdateItemBlobParams struct {
-	EncData     []byte
-	EncOverview []byte
-	Nonce       []byte
-	ID          uuid.UUID
+	EncData       []byte
+	EncOverview   []byte
+	Nonce         []byte
+	OverviewNonce []byte
+	ID            uuid.UUID
 }
 
 func (q *Queries) UpdateItemBlob(ctx context.Context, arg UpdateItemBlobParams) error {
@@ -431,6 +438,7 @@ func (q *Queries) UpdateItemBlob(ctx context.Context, arg UpdateItemBlobParams) 
 		arg.EncData,
 		arg.EncOverview,
 		arg.Nonce,
+		arg.OverviewNonce,
 		arg.ID,
 	)
 	return err
