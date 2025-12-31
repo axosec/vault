@@ -22,7 +22,7 @@ type CreateItemReq struct {
 type UpdateItemReq struct {
 	EncData       []byte `json:"enc_data" binding:"required"`
 	EncOverview   []byte `json:"enc_overview"`
-	Nonce         []byte `json:"nonce" binding:"required"`
+	Nonce         []byte `json:"data_nonce" binding:"required"`
 	OverviewNonce []byte `json:"overview_nonce" binding:"required"`
 }
 
